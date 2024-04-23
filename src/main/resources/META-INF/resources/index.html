@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Jobs UI!</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly-additions.min.css">
+
+    <style>
+        #jobs {
+          resize: none;
+          overflow: hidden;
+          min-height: 300px;
+          max-height: 300px;
+      }
+    </style>
+</head>
+
+<body>
+        <nav class="navbar navbar-default navbar-pf" role="navigation">
+                <div class="navbar-header">                  
+                  <a class="navbar-brand" href="/">
+                   <p><strong>>> jobs!</strong></p>
+                  </a>
+                </div>
+        </nav>
+    <div class="container">
+      <br/>
+      <div class="row">
+          <input id="systemId" class="col-md-4" type="text" placeholder="your systemId">
+          <button id="connect" class="col-md-1 btn btn-primary" type="button">connect</button>
+          <br/>
+          <br/>
+      </div>
+      <div class="row">
+          <textarea class="col-md-8" id="jobs"></textarea>
+      </div>
+      <div class="row">
+          <input class="col-md-6" id="msg" type="text" placeholder="enter your workstation Id">
+          <button class="col-md-1 btn btn-primary" id="Join" type="button" disabled>Join</button>
+      </div>
+      
+      </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/js/patternfly.min.js"></script>
+
+    <script type="text/javascript">
+      var connected = false;
+      var socket;
+
+      $( document ).ready(function() {
+          $("#connect").click(connect);
+          $("#Join").click(sendMessage);
+
+          $("#systemId").keypress(function(event){
+              if(event.keyCode == 13 || event.which == 13) {
+                  connect();
+              }
+          });
+
+          $("#msg").keypress(function(event) {
+              if(event.keyCode == 13 || event.which == 13) {
+                  sendMessage();
+              }
+          });
+
+        $("#jobs").change(function() {
+            scrollToBottom();
+          });
+
+          $("#systemId").focus();
+      });
+
+      var connect = function() {
+          if (! connected) {
+              var systemId = $("#systemId").val();
+              console.log("Val: " + systemId);
+              socket = new WebSocket("ws://" + location.host + "/jobs/" + systemId);
+              socket.onopen = function() {
+                  connected = true;
+                  console.log("Connected to the web socket");
+                  $("#Join").attr("disabled", false);
+                  $("#connect").attr("disabled", true);
+                  $("#systemId").attr("disabled", true);
+                  $("#msg").focus();
+              };
+              socket.onmessage =function(m) {
+                  console.log("Got message: " + m.data);
+                  $("#jobs").append(m.data + "\n");
+                  scrollToBottom();
+              };
+          }
+      };
+
+      var sendMessage = function() {
+          if (connected) {
+              var value = $("#msg").val();
+              console.log("Sending " + value);
+              socket.send(value);
+              $("#msg").val("");
+          }
+      };
+
+      var scrollToBottom = function () {
+        $('#jobs').scrollTop($('#jobs')[0].scrollHeight);
+      };
+
+    </script>
+</body>
+
+</html>
