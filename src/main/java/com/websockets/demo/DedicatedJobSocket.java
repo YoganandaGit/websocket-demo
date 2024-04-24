@@ -6,6 +6,8 @@ import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Random;
@@ -19,13 +21,16 @@ import java.util.concurrent.TimeUnit;
 public class DedicatedJobSocket {
     private static ConcurrentHashMap<String, Session> clients = new ConcurrentHashMap<>();
 
+    private static final Logger logger = LoggerFactory.getLogger(DedicatedJobSocket.class);
+
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @OnOpen
     public void onOpen(Session session) {
         // Add session to the connected sessions set
-        clients.put(session.getId(), session);
-        System.out.println("New session opened: " + session.getId());
+        String sessionId = session.getId();
+        clients.put(sessionId, session);
+        logger.info("New session opened: {}", session.getId());
     }
 
     @OnMessage
@@ -43,13 +48,13 @@ public class DedicatedJobSocket {
     public void onClose(Session session) {
         // Remove session from the set
         clients.remove(session.getId());
-        System.out.println("Session closed: " + session.getId());
+        logger.info("Session closed: {} ", session.getId());
     }
 
     @OnError
     public void onError(Session session, Throwable throwable) {
         // Handle error
-        System.out.println("Error on session " + session.getId() + ": " + throwable.getMessage());
+        logger.info("Error on session {} : {} ", session.getId(), throwable.getMessage());
     }
 
     private void printRandomMessage(String sessionId, String systemId) {
@@ -66,21 +71,28 @@ public class DedicatedJobSocket {
             String process = processes[random.nextInt(processes.length)];
             String state = states[random.nextInt(states.length)];
 
-            String message = UUID.randomUUID() + " " + phase + " " + process + " " + state + " "+ systemId;
+            String message = UUID.randomUUID() + " " + phase + " " + process + " " + state + " " + systemId;
+            sendMessage(sessionId, message);
 
-            Session targetSession = clients.get(sessionId);
-            if (targetSession != null) {
-                try {
-                    targetSession.getBasicRemote().sendText(message);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                System.out.println("Sent message to " + sessionId + ": " + message);
-            } else {
-                System.out.println("Session " + sessionId + " not found");
-            }
         };
         // Schedule the task to run every 1 second
         scheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
+    }
+
+    private void sendMessage(String sessionId, String message) {
+        Session session = clients.get(sessionId);
+        if (session != null) {
+            try {
+                if (message != null) {
+                    session.getBasicRemote().sendText(message);
+                } else {
+                    session.getBasicRemote().sendText(sessionId);
+                }
+            } catch (IOException e) {
+                logger.info("Error sending message to session {} : {} ", sessionId, e.getMessage());
+            }
+        } else {
+            logger.info("Session {} not found", sessionId);
+        }
     }
 }
