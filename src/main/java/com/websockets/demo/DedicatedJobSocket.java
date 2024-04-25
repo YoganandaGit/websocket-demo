@@ -1,5 +1,6 @@
 package com.websockets.demo;
 
+import com.google.common.collect.Maps;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
@@ -10,16 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @ServerEndpoint("/dedicatedJob")
 public class DedicatedJobSocket {
-    private static final ConcurrentHashMap<String, Session> clients = new ConcurrentHashMap<>();
+    private static final Map<String, Session> clients = Maps.newConcurrentMap();
 
     private static final Logger logger = LoggerFactory.getLogger(DedicatedJobSocket.class);
 
