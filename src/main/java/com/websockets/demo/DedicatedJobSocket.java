@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 @ServerEndpoint("/dedicatedJob")
 public class DedicatedJobSocket {
-    private static ConcurrentHashMap<String, Session> clients = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Session> clients = new ConcurrentHashMap<>();
 
     private static final Logger logger = LoggerFactory.getLogger(DedicatedJobSocket.class);
 
@@ -30,6 +30,7 @@ public class DedicatedJobSocket {
         // Add session to the connected sessions set
         String sessionId = session.getId();
         clients.put(sessionId, session);
+        session.getAsyncRemote().sendText(sessionId);
         logger.info("New session opened: {}", session.getId());
     }
 
@@ -48,6 +49,7 @@ public class DedicatedJobSocket {
     public void onClose(Session session) {
         // Remove session from the set
         clients.remove(session.getId());
+        scheduler.close();
         logger.info("Session closed: {} ", session.getId());
     }
 
