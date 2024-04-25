@@ -1,4 +1,4 @@
-package com.websockets.demo;
+package com.websockets.demo.websocket;
 
 import com.google.common.collect.Maps;
 import jakarta.websocket.OnClose;
