@@ -1,6 +1,6 @@
 package com.websockets.demo.memcache;
 
-import com.websockets.demo.memcache.socket.PushJobsWebSocket;
+import com.websockets.demo.websocket.PushJobsWebSocket;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

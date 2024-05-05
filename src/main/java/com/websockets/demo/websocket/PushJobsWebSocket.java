@@ -1,6 +1,5 @@
-package com.websockets.demo.memcache.socket;
+package com.websockets.demo.websocket;
 
-import com.websockets.demo.websocket.JobSocket;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
