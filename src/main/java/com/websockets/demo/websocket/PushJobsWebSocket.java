@@ -19,7 +19,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @ApplicationScoped
 public class PushJobsWebSocket {
 
-    private static final Logger LOG = Logger.getLogger(JobSocket.class);
+    private static final Logger LOG = Logger.getLogger(PushJobsWebSocket.class);
 
     private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
