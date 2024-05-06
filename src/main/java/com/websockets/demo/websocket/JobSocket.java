@@ -1,4 +1,4 @@
-package com.websockets.demo;
+package com.websockets.demo.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.websocket.OnClose;
