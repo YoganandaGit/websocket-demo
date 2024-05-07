@@ -1,5 +1,6 @@
 package com.websockets.demo.service;
 
+import com.google.common.collect.Lists;
 import com.websockets.demo.memcache.MessageCache;
 import com.websockets.demo.model.JobInfo;
 import io.smallrye.mutiny.Uni;
@@ -17,19 +18,25 @@ public class JobService {
         String[] phases = { "TR", "LR", "LRP", "LI", "LIP", "TLI", "TLIP", "LLI", "LLIP", "TE", "LE" };
         String[] processes = { "AFIS" };
         String[] states = { "WAIT", "EXEC", "DONE" };
+        List<JobInfo> jobList = Lists.newArrayList();
 
-        // Generate random indices to select words
-        String phase = phases[random.nextInt(phases.length)];
-        String process = processes[random.nextInt(processes.length)];
-        String state = states[random.nextInt(states.length)];
-        String jobId = UUID.randomUUID().toString();
-
-        JobInfo jobInfo = new JobInfo(phase, process, state, systemId, jobId);
-
+        //iterate this block 10 times using the lambda expression
+        //to generate 10 random job info
+        for (int i = 0; i < 10; i++) {
+            // Generate random indices to select words
+            String phase = phases[random.nextInt(phases.length)];
+            String process = processes[random.nextInt(processes.length)];
+            String state = states[random.nextInt(states.length)];
+            String jobId = UUID.randomUUID().toString();
+            JobInfo jobInfo = new JobInfo(phase, process, state, systemId, jobId);
+            jobList.add(jobInfo);
+        }
         //Push the message into the cache
-        MessageCache.getInstance().addMessage(jobId, String.join(",", phase, process, state, systemId));
+        jobList
+                .forEach(jobInfo -> MessageCache.getInstance().addMessage(jobInfo.getJobId(), String.join(",", jobInfo.getPhase(), jobInfo.getProcess(), jobInfo.getState(), systemId)));
 
-        return Uni.createFrom().item(List.of(jobInfo));
+        //Return the list of job info
+        return Uni.createFrom().item(jobList);
     }
 
 }

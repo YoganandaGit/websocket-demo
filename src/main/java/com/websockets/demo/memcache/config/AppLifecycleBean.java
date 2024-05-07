@@ -11,6 +11,6 @@ public class AppLifecycleBean {
 
     void onStart(@Observes StartupEvent ev) {
         MessageCache cache = MessageCache.getInstance();
-        cache.addListener(new MessageSubscriber("WebSocketsDemoSubscriber"));
+        cache.addListener(new MessageSubscriber(""));
     }
 }

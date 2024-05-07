@@ -13,7 +13,7 @@ public class MessageSubscriber implements MessageListener {
 
     @Override
     public void onMessageAdded(String key, String message) {
-        PushJobsWebSocket.broadcast("[" + name + "] " + key + ": " + message);
+        PushJobsWebSocket.broadcast("[" + key + "] " + ": " + message);
     }
 }
 
