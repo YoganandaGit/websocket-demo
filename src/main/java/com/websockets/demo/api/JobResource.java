@@ -11,7 +11,10 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.jboss.resteasy.reactive.ResponseStatus;
 
 import java.util.List;
@@ -20,6 +23,9 @@ import java.util.List;
 public class JobResource {
 
     private final JobService jobService;
+
+    @Channel("job-updates")
+    Emitter<JobInfo> jobUpdatesEmitter;
 
     @Inject
     public JobResource(JobService jobService) {
@@ -38,6 +44,16 @@ public class JobResource {
     public Uni<JobInfo> create(JobInfo jobInfo) {
         return null;
     }
+
+    @POST
+    @Path("/kafka/push/{systemId}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Uni<String> pushJobsToKafka(@PathParam("systemId") String systemId) {
+        List<JobInfo> jobs = jobService.prepareJobList(systemId);
+        jobUpdatesEmitter.send(jobs.get(0));
+        return Uni.createFrom().item(jobs.get(0).toString());
+    }
+
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)

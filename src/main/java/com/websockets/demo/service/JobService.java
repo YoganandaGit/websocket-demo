@@ -14,6 +14,15 @@ import java.util.UUID;
 public class JobService {
 
     public Uni<List<JobInfo>> listJobs(String systemId) {
+        List<JobInfo> jobList = prepareJobList(systemId);
+        //Push the message into the cache
+        jobList
+                .forEach(jobInfo -> MessageCache.getInstance().addMessage(jobInfo.getJobId(), String.join(",", jobInfo.getPhase(), jobInfo.getProcess(), jobInfo.getState(), systemId)));
+        //Return the list of job info
+        return Uni.createFrom().item(jobList);
+    }
+
+    public List<JobInfo> prepareJobList(String systemId) {
         Random random = new Random();
         String[] phases = { "TR", "LR", "LRP", "LI", "LIP", "TLI", "TLIP", "LLI", "LLIP", "TE", "LE" };
         String[] processes = { "AFIS" };
@@ -31,12 +40,7 @@ public class JobService {
             JobInfo jobInfo = new JobInfo(phase, process, state, systemId, jobId);
             jobList.add(jobInfo);
         }
-        //Push the message into the cache
-        jobList
-                .forEach(jobInfo -> MessageCache.getInstance().addMessage(jobInfo.getJobId(), String.join(",", jobInfo.getPhase(), jobInfo.getProcess(), jobInfo.getState(), systemId)));
-
-        //Return the list of job info
-        return Uni.createFrom().item(jobList);
+        return jobList;
     }
 
 }
