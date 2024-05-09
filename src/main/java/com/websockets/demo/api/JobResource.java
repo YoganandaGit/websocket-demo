@@ -18,6 +18,7 @@ import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.jboss.resteasy.reactive.ResponseStatus;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("/api/v1/jobs")
 public class JobResource {
@@ -50,8 +51,12 @@ public class JobResource {
     @Produces(MediaType.TEXT_PLAIN)
     public Uni<String> pushJobsToKafka(@PathParam("systemId") String systemId) {
         List<JobInfo> jobs = jobService.prepareJobList(systemId);
-        jobUpdatesEmitter.send(jobs.get(0));
-        return Uni.createFrom().item(jobs.get(0).toString());
+        String jobsStr = jobs
+                .stream()
+                .peek(jobInfo -> jobUpdatesEmitter.send(jobInfo))
+                .map(JobInfo -> String.join(",", JobInfo.getPhase(), JobInfo.getProcess(), JobInfo.getState(), JobInfo.getSystemId(), JobInfo.getJobId()))
+                .collect(Collectors.joining(System.lineSeparator()));
+        return Uni.createFrom().item(jobsStr);
     }
 
 
