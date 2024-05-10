@@ -78,7 +78,7 @@
           if (! connected) {
               var workstationId = $("#workstationId").val();
               console.log("Val: " + workstationId);
-              socket = new WebSocket("ws://" + location.host + "/pushJobs/" + workstationId);
+              socket = new WebSocket("wss://" + location.host + "/pushJobs/" + workstationId);
               socket.onopen = function() {
                   connected = true;
                   console.log("Connected to the web socket");
