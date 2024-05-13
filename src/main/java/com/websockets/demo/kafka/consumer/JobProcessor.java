@@ -10,8 +10,8 @@ import org.eclipse.microprofile.reactive.messaging.Outgoing;
 @ApplicationScoped
 public class JobProcessor {
 
-    @Incoming("updates")
-    @Outgoing("jobs")
+    @Incoming("incomingUpdates")
+    @Outgoing("outgoingJobs")
     @Blocking
     public void process(JobInfo jobInfo) {
         PushJobsWebSocket.broadcast("[" + jobInfo.getJobId() + "] " + ": " + String.join(",", jobInfo.getPhase(), jobInfo.getProcess(), jobInfo.getState(), jobInfo.getSystemId()));
