@@ -50,7 +50,7 @@ public class DedicatedJobSocket {
     public void onClose(Session session) {
         // Remove session from the set
         clients.remove(session.getId());
-        scheduler.close();
+        scheduler.shutdown();
         logger.info("Session closed: {} ", session.getId());
     }
 
